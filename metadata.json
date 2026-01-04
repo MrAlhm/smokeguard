@@ -1,0 +1,7 @@
+{
+  "name": "Intelligent Vehicle Emission Monitor",
+  "description": "An AI-powered system for real-time smoke detection, vehicle identification, and automated pollution enforcement.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
