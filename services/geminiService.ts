@@ -3,6 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { GeminiAnalysis } from "../types";
 
 export const analyzeVehicleImage = async (base64Data: string): Promise<GeminiAnalysis> => {
+  // Use 'gemini-3-flash-preview' for vision-based classification tasks
   const model = 'gemini-3-flash-preview';
   
   const prompt = `Analyze this vehicle image for emission monitoring. Identify:
@@ -30,7 +31,8 @@ export const analyzeVehicleImage = async (base64Data: string): Promise<GeminiAna
   };
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Initializing with named parameter as per guidelines
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: model,
       contents: [{
@@ -42,7 +44,9 @@ export const analyzeVehicleImage = async (base64Data: string): Promise<GeminiAna
       config: { responseMimeType: "application/json", responseSchema: responseSchema }
     });
 
-    return JSON.parse(response.text?.trim() || '{}');
+    // Accessing text as a property
+    const text = response.text || '{}';
+    return JSON.parse(text.trim());
   } catch (error: any) {
     console.error('Gemini Analysis Error:', error);
     return {
@@ -59,7 +63,7 @@ export const analyzeVehicleImage = async (base64Data: string): Promise<GeminiAna
 
 export const getPolicyAdvice = async (history: any[], message: string) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const chat = ai.chats.create({
       model: 'gemini-3-flash-preview',
       config: {
@@ -67,6 +71,7 @@ export const getPolicyAdvice = async (history: any[], message: string) => {
       }
     });
     const result = await chat.sendMessage({ message });
+    // Accessing text as a property
     return result.text;
   } catch (error) {
     return "I am currently processing high traffic. Please try again.";

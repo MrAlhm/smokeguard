@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ViolationData } from '../types';
 
 interface ChallanViewProps {
@@ -7,134 +7,154 @@ interface ChallanViewProps {
 }
 
 const ChallanView: React.FC<ChallanViewProps> = ({ violation }) => {
+  const [deliveryStatus, setDeliveryStatus] = useState<'IDLE' | 'SENDING' | 'SENT'>('IDLE');
+
   if (!violation) {
     return (
-      <div className="flex flex-col items-center justify-center h-80 bg-[#111827] border border-slate-800 rounded-3xl p-8 text-slate-500">
-        <span className="text-5xl mb-4">📄</span>
-        <p className="text-xl font-medium">No violation selected</p>
-        <p className="text-sm mt-2 text-slate-600">Select a record from the Logs or run a new detection</p>
+      <div className="flex flex-col items-center justify-center h-[550px] bg-slate-900/40 border border-slate-800 rounded-[3.5rem] p-12 text-slate-500 backdrop-blur-2xl animate-in fade-in duration-500 shadow-inner ring-1 ring-white/5">
+        <div className="w-28 h-28 bg-slate-800 rounded-[2.5rem] flex items-center justify-center text-5xl mb-8 shadow-2xl border border-slate-700 animate-bounce">📄</div>
+        <p className="text-3xl font-black text-white tracking-tight">No Evidence Pipeline</p>
+        <p className="text-sm mt-4 text-slate-500 text-center max-w-sm leading-relaxed font-bold uppercase tracking-widest opacity-60">Initialize Vision Node scan to populate enforcement documentation.</p>
       </div>
     );
   }
 
-  const exportCSV = () => {
-    const headers = ['Violation ID', 'Vehicle Number', 'Type', 'Color', 'Severity', 'Opacity', 'Penalty', 'Timestamp', 'Location'];
-    const row = [
-      violation.violationId,
-      violation.vehicleNumber,
-      violation.vehicleType,
-      violation.vehicleColor,
-      violation.smokeSeverity,
-      `${(violation.smokeScore * 100).toFixed(1)}%`,
-      violation.penalty,
-      violation.timestamp,
-      violation.location || 'N/A'
-    ];
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n" 
-      + row.join(",");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `challan_${violation.violationId}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const exportPDF = () => {
-    // Triggers browser native print which can be saved as PDF
-    window.print();
+  const simulateDelivery = () => {
+    setDeliveryStatus('SENDING');
+    setTimeout(() => setDeliveryStatus('SENT'), 2000);
   };
 
   return (
-    <div className="animate-in zoom-in-95 duration-300">
-      <div id="printable-challan" className="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/40 border border-slate-200 print:m-0 print:shadow-none print:border-none">
-        <div className="bg-slate-900 text-white p-8 flex justify-between items-center print:bg-black">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Electronic Violation Record</h2>
-            <p className="text-slate-400 text-sm mt-1">SmokeGuard AI Monitoring System</p>
+    <div className="animate-in zoom-in-95 duration-500 space-y-12 pb-24">
+      <div id="printable-challan" className="bg-white text-slate-900 rounded-[4rem] overflow-hidden shadow-2xl shadow-teal-900/40 border-8 border-white/5 print:m-0 print:shadow-none print:border-none">
+        <div className="bg-[#050810] text-white p-12 flex justify-between items-center print:bg-black">
+          <div className="flex items-center gap-6">
+            <div className="bg-teal-600 p-3 rounded-2xl shadow-[0_0_20px_rgba(20,184,166,0.5)] border border-teal-400/30">
+              <span className="text-[14px] font-black tracking-tighter text-white">SG</span>
+            </div>
+            <div>
+              <h2 className="text-4xl font-black tracking-tighter uppercase mb-1">Notice of Violation</h2>
+              <p className="text-teal-500 text-xs font-black tracking-[0.3em] uppercase opacity-80">Central AI-Enforcement Division</p>
+            </div>
           </div>
           <div className="text-right">
-            <p className="text-xs uppercase font-bold text-slate-500 tracking-widest">ID</p>
-            <p className="text-lg font-mono font-bold text-blue-400">{violation.violationId}</p>
+            <p className="text-[11px] uppercase font-black text-slate-500 tracking-[0.3em] mb-2">Legal Docket Ref</p>
+            <p className="text-3xl font-mono font-black text-teal-400 drop-shadow-sm">{violation.violationId}</p>
           </div>
         </div>
 
-        <div className="p-8 grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-1 space-y-6">
-            <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm print:max-h-60">
-              <img src={violation.imageUrl} alt="Violation Proof" className="w-full h-auto object-contain" />
+        <div className="p-12 grid md:grid-cols-3 gap-16">
+          <div className="md:col-span-1 space-y-10">
+            <div className="relative rounded-[3rem] overflow-hidden border-8 border-slate-50 shadow-2xl group cursor-zoom-in aspect-square">
+              <img src={violation.imageUrl} alt="Forensic Evidence" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute bottom-6 left-6 bg-teal-600 text-white text-[9px] font-black px-4 py-2 rounded-full shadow-2xl tracking-[0.2em] border border-white/20">PROOF_IMG_SECURED</div>
             </div>
-            <div className="bg-slate-100 p-4 rounded-xl border border-slate-200">
-              <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Digital Proof Hash</p>
-              <p className="text-[10px] font-mono break-all opacity-60">
-                0x{Math.random().toString(16).slice(2)}...{Math.random().toString(16).slice(2)}
-              </p>
+            
+            <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 shadow-inner">
+              <h4 className="text-[11px] uppercase font-black text-slate-400 mb-5 tracking-[0.25em] flex items-center gap-3">
+                 <span className="w-2 h-4 bg-teal-500 rounded-full"></span>
+                 AI Evidence Audit
+              </h4>
+              <ul className="space-y-4">
+                {violation.aiReasoning.map((reason, i) => (
+                  <li key={i} className="text-xs font-bold text-slate-600 flex items-start gap-4 leading-relaxed group">
+                    <span className="text-teal-500 text-lg leading-none transition-transform group-hover:scale-125">✓</span>
+                    {reason}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          <div className="md:col-span-2 space-y-8">
-            <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-              <Detail label="Vehicle Number" value={violation.vehicleNumber} isMono />
-              <Detail label="Vehicle Category" value={violation.vehicleType} />
-              <Detail label="Vehicle Color" value={violation.vehicleColor} />
-              <Detail label="Detection Time" value={violation.timestamp} />
-              <Detail label="Pollution Level" value={violation.smokeSeverity} isUrgent />
-              <Detail label="Opacity Score" value={`${(violation.smokeScore * 100).toFixed(1)}%`} />
+          <div className="md:col-span-2 space-y-12">
+            <div className="grid grid-cols-2 gap-x-16 gap-y-12">
+              <Detail label="Subject Plate ID" value={violation.vehicleNumber} isMono />
+              <Detail label="Classification" value={violation.vehicleType} />
+              <Detail label="Active Node" value={violation.location} />
+              <Detail label="Timestamp (IST)" value={violation.timestamp} />
+              <Detail label="Pollution Grade" value={violation.smokeSeverity} isUrgent />
+              
+              <div className="space-y-3">
+                <p className="text-[11px] uppercase font-black text-slate-400 tracking-[0.25em] mb-2">Legal Defensibility</p>
+                <div className="flex items-center gap-5">
+                  <span className="text-3xl font-black text-slate-900 tabular-nums">{violation.aiConfidence}%</span>
+                  <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-gradient-to-r from-teal-500 to-blue-500 shadow-lg" style={{ width: `${violation.aiConfidence}%` }}></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="h-px bg-slate-200 w-full my-6"></div>
+            <div className="h-px bg-slate-100 w-full my-10"></div>
 
-            <div className="flex items-center justify-between p-6 bg-red-50 border border-red-200 rounded-2xl print:border-red-600">
-              <div>
-                <p className="text-xs uppercase font-bold text-red-600 tracking-wider">Penalty Amount</p>
-                <p className="text-3xl font-black text-slate-900">{violation.penalty}</p>
+            <div className="flex items-center justify-between p-10 bg-gradient-to-br from-teal-50 to-white border-2 border-teal-100 rounded-[3rem] relative overflow-hidden shadow-xl">
+              <div className="absolute -right-16 -bottom-16 text-[15rem] text-teal-200 opacity-20 rotate-12 pointer-events-none font-serif tracking-tighter">⚖️</div>
+              <div className="relative z-10">
+                <p className="text-[11px] uppercase font-black text-teal-600 tracking-[0.3em] mb-3">Notice Penalty Value</p>
+                <p className="text-7xl font-black text-slate-900 tracking-tighter tabular-nums drop-shadow-sm">{violation.penalty}</p>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-red-700/70 max-w-[200px]">Fine imposed by SmokeGuard AI for violation of environmental standards.</p>
+              <div className="text-right max-w-[280px] relative z-10 space-y-4">
+                <p className="text-[11px] font-black text-teal-800 uppercase tracking-widest underline decoration-teal-200 underline-offset-4">Legal Citation</p>
+                <p className="text-xs font-bold text-slate-600 leading-relaxed italic border-r-4 border-teal-500 pr-5">This notice is issued under Section 190(2) of the Motor Vehicles Act. Visible opacity measured exceeds statutory environmental limits.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500 italic print:hidden">
-          <p>© 2024 SmokeGuard AI | Team Black Dragon</p>
-          <p>Confidence: {violation.aiConfidence}% • Verified Proof Attached</p>
+        <div className="px-12 py-10 bg-[#050810] border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-500 font-black uppercase tracking-[0.3em] print:hidden">
+          <p>© 2024 SmokeGuard AI | Digital Forensic Division</p>
+          <div className="flex items-center gap-4">
+            <div className="w-2.5 h-2.5 bg-teal-500 rounded-full shadow-[0_0_10px_rgba(20,184,166,0.6)]"></div>
+            Immutable Proof Chain Verified
+          </div>
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap justify-center gap-4 print:hidden">
+      <div className="flex flex-wrap justify-center gap-8 print:hidden px-4">
         <button 
-          onClick={exportPDF}
-          className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-2xl shadow-xl shadow-blue-900/20 transition-all flex items-center gap-2"
+          onClick={() => window.print()}
+          className="group bg-teal-600 hover:bg-teal-500 text-white font-black px-12 py-6 rounded-3xl shadow-[0_20px_50px_rgba(20,184,166,0.4)] transition-all flex items-center gap-4 border-b-8 border-teal-800 hover:-translate-y-1"
         >
-          <span>📄</span> Download PDF
+          <span className="text-3xl transition-transform group-hover:scale-125">🖨️</span> 
+          <span className="uppercase tracking-[0.1em] text-sm font-black">Generate Legal PDF</span>
         </button>
+        
         <button 
-          onClick={exportCSV}
-          className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-8 py-4 rounded-2xl border border-slate-700 transition-all flex items-center gap-2"
+          onClick={simulateDelivery}
+          disabled={deliveryStatus !== 'IDLE'}
+          className={`px-12 py-6 rounded-3xl font-black transition-all flex items-center gap-4 border-b-8 shadow-2xl relative overflow-hidden ${
+            deliveryStatus === 'SENT' 
+            ? 'bg-green-600 text-white border-green-800 shadow-green-900/30' 
+            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white shadow-black/40'
+          }`}
         >
-          <span>📊</span> Export CSV
+          <span className="text-3xl relative z-10">
+            {deliveryStatus === 'IDLE' ? '📲' : deliveryStatus === 'SENDING' ? '📡' : '✅'}
+          </span>
+          <span className="relative z-10 uppercase tracking-[0.1em] text-sm font-black">
+            {deliveryStatus === 'IDLE' ? 'Transmit to Owner' : deliveryStatus === 'SENDING' ? 'Dispatching Signals...' : 'E-Notice Delivered'}
+          </span>
+          {deliveryStatus === 'SENDING' && <div className="absolute inset-0 bg-white/10 animate-pulse"></div>}
         </button>
-        <button className="bg-slate-900 hover:bg-slate-800 text-slate-400 font-bold px-8 py-4 rounded-2xl border border-slate-800 transition-all">
-          ✉️ Send to Owner
+
+        <button className="bg-slate-900/40 hover:bg-slate-900 text-slate-500 font-black px-12 py-6 rounded-3xl border border-slate-800 transition-all shadow-xl backdrop-blur-md uppercase tracking-[0.1em] text-sm">
+          Audit Raw JSON
         </button>
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body * { visibility: hidden; }
+          body * { visibility: hidden; background: white !important; color: black !important; }
           #printable-challan, #printable-challan * { visibility: visible; }
           #printable-challan { 
-            position: fixed; 
+            position: absolute; 
             left: 0; 
             top: 0; 
             width: 100%; 
-            height: auto;
             border-radius: 0;
+            box-shadow: none;
+            border: none;
           }
         }
       `}} />
@@ -143,9 +163,9 @@ const ChallanView: React.FC<ChallanViewProps> = ({ violation }) => {
 };
 
 const Detail: React.FC<{ label: string; value: string; isMono?: boolean; isUrgent?: boolean }> = ({ label, value, isMono, isUrgent }) => (
-  <div>
-    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">{label}</p>
-    <p className={`text-lg font-bold ${isMono ? 'font-mono tracking-wider' : ''} ${isUrgent ? 'text-red-600' : 'text-slate-800'}`}>
+  <div className="space-y-2 group">
+    <p className="text-[11px] uppercase font-black text-slate-400 tracking-[0.2em] mb-2 group-hover:text-teal-600 transition-colors">{label}</p>
+    <p className={`text-2xl font-black leading-tight ${isMono ? 'font-mono tracking-widest' : 'tracking-tighter'} ${isUrgent ? 'text-red-600 bg-red-50 px-5 py-2 rounded-2xl inline-block shadow-sm ring-1 ring-red-100' : 'text-slate-950'}`}>
       {value}
     </p>
   </div>

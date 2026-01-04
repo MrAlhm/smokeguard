@@ -1,6 +1,6 @@
 {
-  "name": "Intelligent Vehicle Emission Monitor",
-  "description": "An AI-powered system for real-time smoke detection, vehicle identification, and automated pollution enforcement.",
+  "name": "SmokeGuard AI - Command Core",
+  "description": "Enterprise-grade autonomous emission enforcement and environmental impact intelligence system.",
   "requestFramePermissions": [
     "camera"
   ]

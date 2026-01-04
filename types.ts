@@ -20,7 +20,9 @@ export interface ViolationData {
   timestamp: string;
   penalty: string;
   imageUrl: string;
-  location?: string;
+  location: string;
+  status: 'Pending' | 'Sent' | 'Paid' | 'Disputed';
+  aiReasoning: string[];
 }
 
 export interface GeminiAnalysis {
